@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+# Built with assistance from Oh My Pi (GLM 5.3).
+set -euo pipefail
+
+SANDBOX="omp-$(basename "$PWD" | tr '[:upper:]' '[:lower:]' | tr -cs 'a-z0-9-' '-' | sed 's/^-//;s/-$//' | cut -c1-40)"
+
+if podman container exists "$SANDBOX" 2>/dev/null; then
+  echo "omp-pod: container '$SANDBOX' already running; refusing to double-launch (exit or podman rm -f it first)" >&2
+  exit 1
+fi
+
+MOUNTS=(-v "$PWD:/home/agent/workspace:rw,z" -v "$HOME/.omp:/home/agent/.omp:rw,z")
+if [ -d "$HOME/.config/gh" ]; then
+  MOUNTS+=(-v "$HOME/.config/gh:/home/agent/.config/gh:ro,z")
+fi
+
+exec podman run --rm -it \
+  --name "$SANDBOX" \
+  --hostname "$SANDBOX" \
+  --userns=keep-id:uid=1000,gid=1000 \
+  --cap-drop=ALL \
+  --security-opt no-new-privileges \
+  --pids-limit 1024 \
+  --memory 8g \
+  --cpus 4 \
+  "${MOUNTS[@]}" \
+  -e HOME=/home/agent \
+  -e PI_CONFIG_DIR=.omp \
+  omp-pod:latest "$@"

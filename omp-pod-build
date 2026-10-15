@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+# Built with assistance from Oh My Pi (GLM 5.3).
+set -euo pipefail
+cd "$(dirname "$0")"
+# OMP_VERSION=X.Y.Z pins a release; OMP_VERSION=latest resolves the newest
+# tag from https://github.com/can1357/oh-my-pi/releases
+OMP_VERSION="${OMP_VERSION:-latest}"
+if [ "$OMP_VERSION" = "latest" ]; then
+  OMP_VERSION="$(curl -fsSL https://api.github.com/repos/can1357/oh-my-pi/releases/latest \
+    | sed -n 's/.*"tag_name": *"v\([^"]*\)".*/\1/p' | head -1)"
+  OMP_VERSION="${OMP_VERSION:?could not resolve latest omp release}"
+  echo ">> resolved latest omp: v${OMP_VERSION}" >&2
+fi
+podman build -f omp-pod-containerfile --build-arg "OMP_VERSION=${OMP_VERSION}" -t omp-pod:latest .

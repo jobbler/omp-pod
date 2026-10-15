@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+# Built with assistance from Oh My Pi (GLM 5.3).
+set -euo pipefail
+
+# If the host gh session is mounted, make git use it for HTTPS remotes.
+# The minimal image has no gh binary, so this is a git credential helper
+# that answers from the read-only hosts.yml — same effect as the
+# `gh auth setup-git` step omp-sbx runs, minus the gh install.
+if [ -f "$HOME/.config/gh/hosts.yml" ]; then
+  git config --global credential.helper \
+    '!f() { token=$(awk "/^[[:space:]]*oauth_token:/{print \$2; exit}" "$HOME/.config/gh/hosts.yml"); printf "username=x-access-token\npassword=%s\n" "$token"; }; f'
+fi
+
+cd /home/agent/workspace
+exec omp "$@"

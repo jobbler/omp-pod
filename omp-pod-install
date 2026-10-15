@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+# Built with assistance from Oh My Pi (GLM 5.3).
+set -euo pipefail
+
+DEST="${OMP_POD_DEST:-$HOME/src/omp-pod}"
+BIN_DIR="${OMP_POD_BIN_DIR:-$HOME/.local/bin}"
+
+say() { echo "omp-pod-install: $*" >&2; }
+
+if [ ! -d "$DEST/.git" ] && [ ! -f "$DEST/omp-pod" ]; then
+  say "cloning into $DEST"
+  mkdir -p "$(dirname "$DEST")"
+  git clone https://github.com/jobbler/omp-pod.git "$DEST"
+elif [ -f "$DEST/omp-pod-install" ]; then
+  say "$DEST exists, pulling latest"
+  git -C "$DEST" pull --ff-only 2>/dev/null || say "not a git checkout or diverged; using as-is"
+fi
+
+if [ ! -x "$DEST/omp-pod" ]; then
+  say "ERROR: $DEST/omp-pod missing after clone" >&2
+  exit 1
+fi
+
+mkdir -p "$BIN_DIR"
+ln -sf "$DEST/omp-pod" "$BIN_DIR/omp-pod"
+say "linked $BIN_DIR/omp-pod -> $DEST/omp-pod"
+
+case ":$PATH:" in
+  *":$BIN_DIR:"*) ;;
+  *) say "warning: $BIN_DIR is not on your PATH" ;;
+esac
+
+if [ "${1:-}" = "--no-build" ]; then
+  say "skipping image build (--no-build); run '$DEST/omp-pod-build' later"
+else
+  say "building image omp-pod:latest (newest omp release)"
+  "$DEST/omp-pod-build"
+fi
+
+say "done. usage: cd <project-dir> && omp-pod"
