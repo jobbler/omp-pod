@@ -94,12 +94,6 @@ Running `omp-pod` twice in the same dir refuses with an error instead of
 attaching (attaching a TUI container from a second terminal garbles both).
 Exit the first session or `podman rm -f omp-<dirname>`.
 
-## Resource limits
-
-`--memory 8g --cpus 4 --pids-limit 1024` are set in `omp-pod`; edit the
-launcher if your host is constrained. If a limit flag fails under rootless
-podman (cgroup delegation), drop it — the userns + cap-drop are the real
-boundary.
 
 ## SELinux (Fedora)
 
