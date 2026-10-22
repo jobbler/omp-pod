@@ -16,6 +16,11 @@ Minimal secure podman sandbox for running [omp](https://github.com/can1357/oh-my
   the OAuth token from `hosts.yml`)
 - Unrestricted network egress (model APIs, package installs)
 
+## AI Disclosure
+
+Created with assistance of Oh My Pi running the GLM 5.3 model.
+
+
 ## Install
 
 ```bash
@@ -32,7 +37,9 @@ Or from a checkout:
 Requires: rootless podman (tested 5.8.7 on Fedora), `~/.omp` already set up
 (run host omp once to configure models/auth).
 
-## Bump omp
+## Updating the omp container
+
+This updates the `omp` version running inside the container.
 
 ```bash
 ./omp-pod-build                     # default: newest omp release
@@ -100,4 +107,3 @@ Both mounts use `:z` so podman relabels content as needed; works with
 SELinux enforcing.
 
 
-Created with assistance from Oh My Pi (running the GLM 5.3 model).
